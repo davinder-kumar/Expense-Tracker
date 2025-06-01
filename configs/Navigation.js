@@ -15,16 +15,26 @@ const Navigation = () => {
   function ExpensesList() {
     return (
       <BottomTabs.Navigator
-        screenOptions={{
-          headerStyle: {
-            backgroundColor: globalStyles.colors.primary500,
-          },
-          headerRight: ({tintColor}) =><IconButton size={24} color={tintColor} icon={"add"} onPress={() => {}} />,
-          headerTintColor: "white",
-          tabBarActiveTintColor: globalStyles.colors.accent500,
-          tabBarStyle: {
-            backgroundColor: globalStyles.colors.primary500,
-          },
+      initialRouteName="AllExpenses"
+        screenOptions={({navigation}) => {
+          return {
+            headerStyle: {
+              backgroundColor: globalStyles.colors.primary500,
+            },
+            headerRight: ({ tintColor }) => (
+              <IconButton
+                size={24}
+                color={tintColor}
+                icon={"add"}
+                onPress={() => navigation.navigate("ManageExpense")}
+              />
+            ),
+            headerTintColor: "white",
+            tabBarActiveTintColor: globalStyles.colors.accent500,
+            tabBarStyle: {
+              backgroundColor: globalStyles.colors.primary500,
+            },
+          };
         }}
       >
         <BottomTabs.Screen
@@ -55,12 +65,14 @@ const Navigation = () => {
   return (
     <NavigationContainer>
       <Stack.Navigator initialRouteName="ExpensesListC">
-        <Stack.Screen name="ManageExpense" component={ManageExpense} />
+        <Stack.Screen name="ManageExpense" options={{
+          presentation: "modal"
+        }} component={ManageExpense} />
         <Stack.Screen
           name="ExpensesListC"
           component={ExpensesList}
           options={{
-            headerShown: false,
+            headerShown: false
           }}
         />
       </Stack.Navigator>
