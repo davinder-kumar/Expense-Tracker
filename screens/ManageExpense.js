@@ -2,11 +2,11 @@ import { useContext, useLayoutEffect } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import IconButton from "../components/UI/IconButton";
 import globalStyles from "../constants/globalStyles";
-import { Button } from "../components/UI/Button";
 import { ExpenseContext } from "../store/expenses-context";
+import ManageExpensesForm from "../components/ManageExpenses/ManageExpensesForm";
 
 const ManageExpense = ({ navigation, route }) => {
-  const expensesCtx = useContext(ExpenseContext)
+  const expensesCtx = useContext(ExpenseContext);
   const editExpenseId = route.params?.expenseId;
   const isEditing = !!editExpenseId;
 
@@ -18,31 +18,30 @@ const ManageExpense = ({ navigation, route }) => {
 
   function addUpdateHandler(id) {
     navigation.goBack();
-    if(id){
-      expensesCtx.updateExpense(id, { description: "Edited", date: new Date(), amount: 21.11 })
-    }else{
-      expensesCtx.addExpense("Added", new Date(), 31.99)
-
+    if (id) {
+      expensesCtx.updateExpense(id, {
+        description: "Edited",
+        date: new Date(),
+        amount: 21.11,
+      });
+    } else {
+      expensesCtx.addExpense("Added", new Date(), 31.99);
     }
-
   }
   function cancelHandler() {
     navigation.goBack();
   }
   function deleteHandler(id) {
     navigation.goBack();
-    expensesCtx.deleteExpense(id)
+    expensesCtx.deleteExpense(id);
   }
   return (
     <View style={styles.contaner}>
-      <View style={styles.buttons}>
-        <Button style={styles.button} onPress={cancelHandler} mode={"flat"}>
-          Cancel
-        </Button>
-        <Button style={styles.button} onPress={addUpdateHandler.bind(this, isEditing ? editExpenseId : null)}>
-          {isEditing ? "Update" : "Add"}
-        </Button>
-      </View>
+      <ManageExpensesForm
+        onCancel={cancelHandler}
+        addUpdateHandler={addUpdateHandler}
+        actionType={isEditing ? "Update" : "Add"}
+      />
       {isEditing && (
         <View style={styles.deleteContainer}>
           <IconButton
@@ -60,14 +59,6 @@ const ManageExpense = ({ navigation, route }) => {
 export default ManageExpense;
 
 const styles = StyleSheet.create({
-  buttons: {
-    flexDirection: "row",
-    justifyContent: "center",
-  },
-  button: {
-    minWidth: 120,
-    marginHorizontal: 8,
-  },
   contaner: {
     flex: 1,
     backgroundColor: globalStyles.colors.primary800,
@@ -79,5 +70,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderTopWidth: 2,
     borderTopColor: "white",
-  },
+  }
 });
