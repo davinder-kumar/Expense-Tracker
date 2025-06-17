@@ -1,15 +1,22 @@
-import { useContext, useLayoutEffect } from "react";
+import { useContext, useLayoutEffect, useState } from "react";
 import { View, Text, StyleSheet } from "react-native";
 import IconButton from "../components/UI/IconButton";
 import globalStyles from "../constants/globalStyles";
 import { ExpenseContext } from "../store/expenses-context";
 import ManageExpensesForm from "../components/ManageExpenses/ManageExpensesForm";
+import { saveExpense, updateExpense, deleteExpense } from "../utils/axios";
+import OverLay from "../components/UI/OverLay";
+import ErrorOverLay from "../components/UI/ErrorOverLay";
 
 const ManageExpense = ({ navigation, route }) => {
+  const [error, setError] = useState("");
   const expensesCtx = useContext(ExpenseContext);
+  const [isLoading, setIsLoading] = useState(false);
   const editExpenseId = route.params?.expenseId;
   const isEditing = !!editExpenseId;
-  const editingExpense = expensesCtx.expenses.find(expense => expense.id === editExpenseId)
+  const editingExpense = expensesCtx.expenses.find(
+    (expense) => expense.id === editExpenseId
+  );
 
   useLayoutEffect(() => {
     navigation.setOptions({
@@ -17,20 +24,42 @@ const ManageExpense = ({ navigation, route }) => {
     });
   }, [navigation, isEditing]);
 
-  function submitHandler(id, inputValues) {
+  async function submitHandler(id, inputValues) {
+    setIsLoading(true);
     if (id === "Update") {
       expensesCtx.updateExpense(editExpenseId, inputValues);
+      try {
+        await updateExpense(editExpenseId, inputValues);
+      } catch (e) {
+        setIsLoading(false);
+        setError("An error occured!");
+      }
     } else {
-      expensesCtx.addExpense(inputValues);
+      try {
+        const id = await saveExpense(inputValues);
+        expensesCtx.addExpense({ ...inputValues, id });
+      } catch (e) {
+        setIsLoading(false);
+        setError("An error occured!");
+      }
     }
     navigation.goBack();
   }
   function cancelHandler() {
     navigation.goBack();
   }
-  function deleteHandler(id) {
-    navigation.goBack();
+  async function deleteHandler(id) {
+    setIsLoading(true);
+    try {
+      await deleteExpense(id);
+    } catch (e) {
+      return setError("An error occured!");
+    }
     expensesCtx.deleteExpense(id);
+    navigation.goBack();
+  }
+  if (error && !isLoading) {
+    <ErrorOverLay message={error} />;
   }
   return (
     <View style={styles.contaner}>
@@ -50,6 +79,7 @@ const ManageExpense = ({ navigation, route }) => {
           />
         </View>
       )}
+      {isLoading && <OverLay />}
     </View>
   );
 };
@@ -68,5 +98,5 @@ const styles = StyleSheet.create({
     alignItems: "center",
     borderTopWidth: 2,
     borderTopColor: "white",
-  }
+  },
 });
